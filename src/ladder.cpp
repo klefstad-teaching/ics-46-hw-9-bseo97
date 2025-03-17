@@ -19,14 +19,14 @@ void load_words(set<string>& word_list, const string& file_name) {
     }
 }
 
-bool is_adjacent(const string& word1, const string& word2) {
-    int len1 = word1.size(), len2 = word2.size();
-    if (abs(len1 - len2) > 1) return false;
+bool edit_distance_within(const std::string& str1, const std::string& str2, int d) {
+    int len1 = str1.size(), len2 = str2.size();
+    if (abs(len1 - len2) > d) return false;
     
     int diff = 0, i = 0, j = 0;
     while (i < len1 && j < len2) {
-        if (word1[i] != word2[j]) {
-            if (++diff > 1) return false;
+        if (str1[i] != str2[j]) {
+            if (++diff > d) return false;
             if (len1 > len2) ++i;
             else if (len1 < len2) ++j;
             else { ++i; ++j; }
@@ -34,7 +34,11 @@ bool is_adjacent(const string& word1, const string& word2) {
             ++i; ++j;
         }
     }
-    return true;
+    return diff <= d;
+}
+
+bool is_adjacent(const string& word1, const string& word2) {
+    return edit_distance_within(word1, word2, 1);
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
@@ -75,4 +79,16 @@ void print_word_ladder(const vector<string>& ladder) {
     for (size_t i = 0; i < ladder.size(); ++i) {
         cout << ladder[i] << (i + 1 < ladder.size() ? " -> " : "\n");
     }
+}
+
+void verify_word_ladder() {
+    set<string> word_list;
+    load_words(word_list, "words.txt");
+    
+    assert(generate_word_ladder("cat", "dog", word_list).size() == 4);
+    assert(generate_word_ladder("marty", "curls", word_list).size() == 6);
+    assert(generate_word_ladder("code", "data", word_list).size() == 6);
+    assert(generate_word_ladder("work", "play", word_list).size() == 6);
+    assert(generate_word_ladder("sleep", "awake", word_list).size() == 8);
+    assert(generate_word_ladder("car", "cheat", word_list).size() == 4);
 }
